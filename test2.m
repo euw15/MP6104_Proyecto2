@@ -1,6 +1,18 @@
 close all;
+clc;
+clear;
+pkg load communications;
 
-[inputAudio, fs] = wavread('C:/Users/lopezgui/Desktop/Maestria/PDS/Proy 2/sonido16khz.wav');
+
+audio = "fisica20s_22KHz.wav";
+outaudio = "output.wav";
+
+
+%[inputAudio, fs] = wavread(audio);
+[inputAudio,fs] = audioread(audio);
+audioInfo = audioinfo(audio);
+TotalSamples=audioInfo.TotalSamples;
+
 %[inputAudio, fs] = wavread('C:/Users/lopezgui/Desktop/Maestria/PDS/Proy 2/sonido8khz.wav');
 %[inputAudio, fs] = wavread('C:/Users/lopezgui/Desktop/Maestria/PDS/Proy 2/tone-ramp.wav');
 %[inputAudio, fs] = wavread('C:/Users/lopezgui/Desktop/Maestria/PDS/Proy 2/recording8khz.wav');
@@ -21,27 +33,30 @@ N = 159; %MSE -> 8.5916e-5
 [s1, s2] = filtroCuad(N, inputAudio, fs, 0);
 
 % --------------------------------------- %
-%[s11, s12] = filtroCuad(N, s1, fs/2, 0);
-%[s21, s22] = filtroCuad(N, s2, fs/2, 0);
-%
-%out1 = filtroCuadInv(N, s11, s12, fs/4, 0);
-%out2 = filtroCuadInv(N, s21, s22, fs/4, 0);
+[s11, s12] = filtroCuad(N, s1, fs/2, 0);
+[s21, s22] = filtroCuad(N, s2, fs/2, 0);
+break;
+out1 = filtroCuadInv(N, s11, s12, fs/4, 0);
+out2 = filtroCuadInv(N, s21, s22, fs/4, 0);
 % --------------------------------------- %
 
-out = filtroCuadInv(N, s1, s2, fs/2, 0);
-%out = filtroCuadInv(N, out1, out2, fs/2, 0);
+%out = filtroCuadInv(N, s1, s2, fs/2, 1);
+out = filtroCuadInv(N, out1, out2, fs/2, 0);
 
 %wavwrite(s1, fs/2, 'C:/Users/lopezgui/Desktop/Maestria/PDS/Proy 2/outputMediaBandaInf.wav');
 
 %wavwrite(s2, fs/2, 'C:/Users/lopezgui/Desktop/Maestria/PDS/Proy 2/outputMediaBandaSup.wav');
 
 %wavwrite(out, fs, 'C:/Users/lopezgui/Desktop/Maestria/PDS/Proy 2/recordingRestaurado.wav');
-wavwrite(out, fs, 'C:/Users/lopezgui/Desktop/Maestria/PDS/Proy 2/outputRestaurado.wav');
-break;
+%wavwrite(out, fs, outaudio);
+audiowrite(outaudio, out, fs,'BitsPerSample', audioInfo.BitsPerSample);
+
+%break;
 origDFT = fft(inputAudio);
 restDFT = fft(out);
+N=length(origDFT);
 MSE = 0;
-for(k=1:1:N-1)
+for(k=1:1:N)
   MSE += (abs(origDFT(k+1))-abs(restDFT(k+1)))^2;
 end
 

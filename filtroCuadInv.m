@@ -1,6 +1,8 @@
 
 function [out] = filtroCuadInv(N, s1, s2, fs, plot = 0)
   
+  TotalSamples = length(s1);
+  newSamples = TotalSamples*2;
   newFs = fs * 2;
   b = mediaBandaBlackman(N);
   
@@ -24,11 +26,11 @@ function [out] = filtroCuadInv(N, s1, s2, fs, plot = 0)
     freqz(b, 1);
     
     figure();
-    stem(0:(fs-1), abs(fft(s1, fs)));
+    stem(0:fs/TotalSamples:fs-fs/TotalSamples, abs(fft(s1)));
     title("Espectro señal 1 sin filtrar");
     
     figure();
-    stem(0:(newFs-1), abs(fft(out1, newFs)));
+    stem(0:newFs/newSamples:newFs-newFs/newSamples, abs(fft(out1)));
     title("Espectro señal 1 interpolada media banda inferior");
   endif
   
@@ -38,6 +40,8 @@ function [out] = filtroCuadInv(N, s1, s2, fs, plot = 0)
     bHP(i) = -1 * b(i);
   end
   %bHP = -1 .* bHP;
+  
+  s2(1:2:TotalSamples)= -1.*s2(1:2:TotalSamples);
   
   clear interpolated;
   j=1;
@@ -51,7 +55,6 @@ function [out] = filtroCuadInv(N, s1, s2, fs, plot = 0)
   end
   
   out2 = filter(bHP, 1, interpolated);
-
   out = out1 + out2;
   
   if(plot)
@@ -59,15 +62,15 @@ function [out] = filtroCuadInv(N, s1, s2, fs, plot = 0)
     freqz(bHP, 1);
     
     figure();
-    stem(0:(fs-1), abs(fft(s1, fs)));
+    stem(0:fs/TotalSamples:fs-fs/TotalSamples, abs(fft(s2)));
     title("Espectro señal 2 sin filtrar");
     
     figure();
-    stem(0:(newFs-1), abs(fft(out2, newFs)));
+    stem(0:newFs/newSamples:newFs-newFs/newSamples, abs(fft(out2)));
     title("Espectro señal 2 interpolada media banda superior");
     
     figure();
-    stem(0:(newFs-1), abs(fft(out, newFs)));
+    stem(0:newFs/newSamples:newFs-newFs/newSamples, abs(fft(out)));
     title("Espectro señal restaurada");
   endif
   

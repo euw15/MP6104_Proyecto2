@@ -1,6 +1,7 @@
 
 function [s1, s2] = filtroCuad(N, input, fs, plot = 0)
   
+  TotalSamples = length(input);
   b = mediaBandaBlackman(N);
 
   s1 = filter(b, 1, input);
@@ -21,11 +22,11 @@ function [s1, s2] = filtroCuad(N, input, fs, plot = 0)
     freqz(b, 1);
     
     figure();
-    stem(0:(fs-1), abs(fft(input, fs)));
+    stem(0:(fs/TotalSamples):fs-fs/TotalSamples, abs(fft(input)));
     title("Espectro señal sin filtrar");
     
     figure();
-    stem(0:(fs-1), abs(fft(s1, fs)));
+    stem(0:(fs/TotalSamples):fs/2-fs/TotalSamples, abs(fft(s1)));
     title("Espectro señal decimada media banda inferior");
   endif
   
@@ -47,16 +48,16 @@ function [s1, s2] = filtroCuad(N, input, fs, plot = 0)
   s2 = 2 .* decimated;
   
   %obtener reflexion
-%  for(i=1:2:length(s2))
-%    s2(i) = -s2(i);
-%  end
+  for(i=1:2:length(s2))
+    s2(i) = -s2(i);
+  end
   
   if(plot)
     figure();
     freqz(bHP, 1);
     
     figure();
-    stem(0:(fs-1), abs(fft(s2, fs)));
+    stem(0:(fs/TotalSamples):fs/2-fs/TotalSamples, abs(fft(s2)));
     title("Espectro señal filtrada media banda superior");
   endif
   
